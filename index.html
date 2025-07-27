@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PW Batch Access</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="dark-mode">
+    <!-- Auth Section -->
+    <div class="auth-container" id="phoneSection">
+        <div class="auth-card">
+            <h1 class="auth-title">Login to Download Batches</h1>
+            <div class="phone-input-group">
+                <div class="phone-input-wrapper">
+                    <div class="country-code">
+                        <span class="country-flag">🇮🇳</span>
+                        <input type="text" id="countryCode" value="+91" readonly>
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <input type="tel" id="phoneNumber" placeholder="Enter phone number" maxlength="10" pattern="[0-9]{10}">
+                </div>
+                <div class="phone-input-border"></div>
+            </div>
+            <button id="sendSmsOtp" class="btn primary mb-2">Send OTP via SMS</button>
+            <button id="sendWhatsappOtp" class="btn secondary">Send OTP via WhatsApp</button>
+        </div>
+    </div>
+
+    <!-- OTP Section -->
+    <div class="auth-container hidden" id="otpSection">
+        <div class="auth-card">
+            <h1 class="auth-title">Enter OTP</h1>
+            <div class="otp-group">
+                <input type="text" maxlength="1" class="otp-input">
+                <input type="text" maxlength="1" class="otp-input">
+                <input type="text" maxlength="1" class="otp-input">
+                <input type="text" maxlength="1" class="otp-input">
+                <input type="text" maxlength="1" class="otp-input">
+                <input type="text" maxlength="1" class="otp-input">
+            </div>
+            <div class="text-center mb-2">
+                <span id="timer" class="hidden">Resend in: <span id="countdown">30</span>s</span>
+                <button id="resendOtp" class="btn link" disabled>Resend OTP</button>
+            </div>
+            <button id="verifyOtp" class="btn primary">Verify OTP</button>
+        </div>
+    </div>
+
+    <!-- Batches Section -->
+    <div id="batchesSection" class="section">
+        <div class="header-container">
+            <div class="search-container">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Search batches...">
+                    <button id="clearSearch" class="clear-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <button id="logoutBtn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+
+        <div class="tabs tabs-container">
+            <button class="tab-btn active" data-tab="all">
+                <i class="fas fa-th-large"></i> All Batches
+            </button>
+            <button class="tab-btn" data-tab="premium">
+                <i class="fas fa-crown"></i> Premium Batches
+            </button>
+            <button class="tab-btn" data-tab="free">
+                <i class="fas fa-gift"></i> Free Batches
+            </button>
+            <button class="tab-btn" data-tab="expired">
+                <i class="fas fa-clock"></i> Expired Batches
+            </button>
+        </div>
+
+        <div class="tab-pane active" id="allBatches">
+            <div class="batch-grid" id="allGrid"></div>
+            <div class="skeleton-grid" id="allSkeletons"></div>
+        </div>
+
+        <div class="tab-pane" id="premiumBatches">
+            <div class="batch-grid" id="premiumGrid"></div>
+            <div class="skeleton-grid" id="premiumSkeletons"></div>
+        </div>
+
+        <div class="tab-pane" id="freeBatches">
+            <div class="batch-grid" id="freeGrid"></div>
+            <div class="skeleton-grid" id="freeSkeletons"></div>
+        </div>
+
+        <div class="tab-pane" id="expiredBatches">
+            <div class="batch-grid" id="expiredGrid"></div>
+            <div class="skeleton-grid" id="expiredSkeletons"></div>
+        </div>
+    </div>
+
+    <!-- Download Modal -->
+    <div id="batchDetailsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Choose Download Method</h2>
+                <button class="modal-close" onclick="closeDownloadModal()">&times;</button>
+            </div>
+            <div class="modal-body download-options-container">
+                <div class="url-container">
+                    <p>Video URL (Click to Copy):</p>
+                    <input type="text" value="" readonly onclick="this.select(); navigator.clipboard.writeText(this.value); showSuccess('URL copied to clipboard!');">
+                </div>
+                <div class="download-options">
+                    <!-- Download options will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update the createBatchCard function in script.js to include thumbnail -->
+    <template id="subjectCardTemplate">
+        <div class="subject-card">
+            <div class="subject-header">
+                <img src="" alt="Subject Icon" class="subject-icon">
+                <h3 class="subject-title"></h3>
+            </div>
+            <div class="subject-meta">
+                <div class="meta-item">
+                    <i class="fas fa-book"></i>
+                    <span class="chapter-count"></span> Chapters
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-play-circle"></i>
+                    <span class="lecture-count"></span> Lectures
+                </div>
+            </div>
+            <div class="subject-teachers">
+                <h4>Faculty:</h4>
+                <div class="teacher-list"></div>
+            </div>
+            <div class="subject-schedule">
+                <h4>Schedule:</h4>
+                <div class="schedule-list"></div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Loading Spinner -->
+    <div class="spinner hidden" id="mainSpinner"></div>
+
+    <!-- Toast Messages -->
+    <div class="toast" id="errorToast">
+        <div class="toast-message"></div>
+        <button class="toast-close">&times;</button>
+    </div>
+<img src="https://hits.technfetch.in/badge.php?url=https%3A%2F%2Fstudyable.io%2Ffinal-able&label=hits&style=flat&labelColor=555555&countColor=4caf50" alt="hits counter" style="display: none;">
+
+    <script src="scripts.js"></script>
+</body>
+</html>
